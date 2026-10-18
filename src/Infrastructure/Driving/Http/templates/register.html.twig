@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Register · Acme{% endblock %}
+
+{% block body %}
+    <article class="narrow">
+        <header>
+            <h1>Create an account</h1>
+        </header>
+
+        {% if error %}
+            <p role="alert">{{ error }}</p>
+        {% endif %}
+
+        <form method="post" action="/register">
+            <label>
+                Email
+                <input type="email" name="email" value="{{ email }}" required autocomplete="email"
+                       {% if error %}aria-invalid="true"{% endif %}>
+            </label>
+            <label>
+                Password
+                <input type="password" name="password" required minlength="{{ minimum_password_length }}"
+                       autocomplete="new-password" aria-describedby="password-helper">
+                <small id="password-helper">At least {{ minimum_password_length }} characters.</small>
+            </label>
+            <button type="submit">Register</button>
+        </form>
+
+        <footer>
+            <small>Already have an account? <a href="/login">Log in</a></small>
+        </footer>
+    </article>
+{% endblock %}

@@ -1,0 +1,7 @@
+.git
+.idea
+.serena
+.playwright-mcp
+.phpunit.cache
+.phpunit.result.cache
+vendor

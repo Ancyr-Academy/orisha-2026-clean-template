@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <title>{% block title %}Acme{% endblock %}</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.1.1/css/pico.min.css"
+          integrity="sha384-L1dWfspMTHU/ApYnFiMz2QID/PlP1xCW9visvBdbEkOLkSSWsP6ZJWhPw6apiXxU"
+          crossorigin="anonymous">
+    <style>
+        .narrow { max-width: 28rem; margin-inline: auto; }
+        nav ul, nav .account { min-width: 0; }
+        nav .account small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        nav form { margin: 0; }
+        /* Pico's [type=submit] rule outranks its own nav button sizing: re-apply it to the logout button */
+        nav form [type="submit"] {
+            margin: 0;
+            white-space: nowrap;
+            padding: calc(var(--pico-nav-link-spacing-vertical) - var(--pico-border-width) * 2) var(--pico-nav-link-spacing-horizontal);
+        }
+        [role="alert"] { color: var(--pico-del-color); }
+    </style>
+</head>
+<body>
+    {% set account = session.get('account') %}
+    <header class="container">
+        <nav>
+            <ul>
+                <li><a href="/" class="contrast"><strong>Acme</strong></a></li>
+            </ul>
+            <ul>
+                {% if account %}
+                    <li class="account"><small title="{{ account.email }}">Logged in as {{ account.email }}</small></li>
+                    <li>
+                        <form method="post" action="/logout">
+                            <button type="submit" class="secondary outline">Log out</button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li><a href="/login">Log in</a></li>
+                    <li><a href="/register" role="button">Register</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        {% block body %}{% endblock %}
+    </main>
+</body>
+</html>

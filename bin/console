@@ -1,0 +1,19 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use Doctrine\Migrations\DependencyFactory;
+use Doctrine\Migrations\Tools\Console\ConsoleRunner as MigrationsConsoleRunner;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Tools\Console\ConsoleRunner as OrmConsoleRunner;
+use Doctrine\ORM\Tools\Console\EntityManagerProvider\SingleManagerProvider;
+
+require dirname(__DIR__) . '/vendor/autoload.php';
+
+$container = (require dirname(__DIR__) . '/config/container.php')();
+
+$console = MigrationsConsoleRunner::createApplication([], $container->get(DependencyFactory::class));
+OrmConsoleRunner::addCommands($console, new SingleManagerProvider($container->get(EntityManagerInterface::class)));
+
+$console->run();

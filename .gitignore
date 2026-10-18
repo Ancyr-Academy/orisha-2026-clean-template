@@ -1,0 +1,12 @@
+# Dependencies
+/vendor/
+
+# PHPUnit
+/.phpunit.cache/
+/.phpunit.result.cache
+
+# Personal tooling (editors, AI assistants): configure these per developer
+/.idea/
+/.serena/
+/.playwright-mcp/
+.DS_Store

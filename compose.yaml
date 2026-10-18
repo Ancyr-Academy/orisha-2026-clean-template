@@ -1,0 +1,34 @@
+services:
+  app:
+    build: .
+    ports:
+      - "${APP_PORT:-8000}:80"
+    environment:
+      APP_DEBUG: "1"
+      DATABASE_URL: postgresql://acme:acme@database:5432/acme?serverVersion=18&charset=utf8
+      TEST_DATABASE_URL: postgresql://acme:acme@database:5432/acme_test?serverVersion=18&charset=utf8
+    volumes:
+      - ./:/app
+    depends_on:
+      database:
+        condition: service_healthy
+
+  database:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: acme
+      POSTGRES_USER: acme
+      POSTGRES_PASSWORD: acme
+    ports:
+      - "${DATABASE_PORT:-5433}:5432"
+    volumes:
+      - database_data:/var/lib/postgresql
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U acme -d acme"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+
+volumes:
+  database_data:
