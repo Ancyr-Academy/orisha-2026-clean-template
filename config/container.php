@@ -8,9 +8,14 @@ use Acme\Application\Bus\UseCaseBus;
 use Acme\Application\Ports\AccountRepository;
 use Acme\Application\Ports\PasswordHasher;
 use Acme\Application\Ports\PatientRepository;
+use Acme\Application\Ports\RoomRepository;
 use Acme\Application\Transaction\TransactionManager;
+use Acme\Application\UseCase\AssignPatientToRoom\AssignPatientToRoomCommand;
+use Acme\Application\UseCase\AssignPatientToRoom\AssignPatientToRoomUseCase;
 use Acme\Application\UseCase\CreatePatient\CreatePatientCommand;
 use Acme\Application\UseCase\CreatePatient\CreatePatientUseCase;
+use Acme\Application\UseCase\DeclareRoom\DeclareRoomCommand;
+use Acme\Application\UseCase\DeclareRoom\DeclareRoomUseCase;
 use Acme\Application\UseCase\DeletePatient\DeletePatientCommand;
 use Acme\Application\UseCase\DeletePatient\DeletePatientUseCase;
 use Acme\Application\UseCase\GetPatient\GetPatientQuery;
@@ -19,14 +24,19 @@ use Acme\Application\UseCase\Home\HomeQuery;
 use Acme\Application\UseCase\Home\HomeUseCase;
 use Acme\Application\UseCase\ListPatients\ListPatientsQuery;
 use Acme\Application\UseCase\ListPatients\ListPatientsUseCase;
+use Acme\Application\UseCase\ListRooms\ListRoomsQuery;
+use Acme\Application\UseCase\ListRooms\ListRoomsUseCase;
 use Acme\Application\UseCase\Login\LoginCommand;
 use Acme\Application\UseCase\Login\LoginUseCase;
 use Acme\Application\UseCase\RegisterAccount\RegisterAccountCommand;
 use Acme\Application\UseCase\RegisterAccount\RegisterAccountUseCase;
+use Acme\Application\UseCase\UnassignPatientFromRoom\UnassignPatientFromRoomCommand;
+use Acme\Application\UseCase\UnassignPatientFromRoom\UnassignPatientFromRoomUseCase;
 use Acme\Application\UseCase\UpdatePatient\UpdatePatientCommand;
 use Acme\Application\UseCase\UpdatePatient\UpdatePatientUseCase;
 use Acme\Infrastructure\Driven\Persistence\Doctrine\DoctrineAccountRepository;
 use Acme\Infrastructure\Driven\Persistence\Doctrine\DoctrinePatientRepository;
+use Acme\Infrastructure\Driven\Persistence\Doctrine\DoctrineRoomRepository;
 use Acme\Infrastructure\Driven\Persistence\Doctrine\DoctrineTransactionManager;
 use Acme\Infrastructure\Driven\Persistence\Doctrine\EntityManagerFactory;
 use Acme\Infrastructure\Driven\Security\NativePasswordHasher;
@@ -70,6 +80,10 @@ return static function (array $overrides = []): ContainerInterface {
                 CreatePatientCommand::class => static fn (): CreatePatientUseCase => $c->get(CreatePatientUseCase::class),
                 UpdatePatientCommand::class => static fn (): UpdatePatientUseCase => $c->get(UpdatePatientUseCase::class),
                 DeletePatientCommand::class => static fn (): DeletePatientUseCase => $c->get(DeletePatientUseCase::class),
+                ListRoomsQuery::class => static fn (): ListRoomsUseCase => $c->get(ListRoomsUseCase::class),
+                DeclareRoomCommand::class => static fn (): DeclareRoomUseCase => $c->get(DeclareRoomUseCase::class),
+                AssignPatientToRoomCommand::class => static fn (): AssignPatientToRoomUseCase => $c->get(AssignPatientToRoomUseCase::class),
+                UnassignPatientFromRoomCommand::class => static fn (): UnassignPatientFromRoomUseCase => $c->get(UnassignPatientFromRoomUseCase::class),
             ]),
             $c->get(TransactionManager::class),
         ),
@@ -82,6 +96,7 @@ return static function (array $overrides = []): ContainerInterface {
         ),
         AccountRepository::class => autowire(DoctrineAccountRepository::class),
         PatientRepository::class => autowire(DoctrinePatientRepository::class),
+        RoomRepository::class => autowire(DoctrineRoomRepository::class),
         PasswordHasher::class => autowire(NativePasswordHasher::class),
         DependencyFactory::class => static fn (ContainerInterface $c): DependencyFactory => DependencyFactory::fromEntityManager(
             new ConfigurationArray([

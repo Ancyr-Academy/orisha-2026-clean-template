@@ -9,6 +9,7 @@ use Acme\Infrastructure\Driving\Http\Controller\LoginController;
 use Acme\Infrastructure\Driving\Http\Controller\LogoutController;
 use Acme\Infrastructure\Driving\Http\Controller\PatientController;
 use Acme\Infrastructure\Driving\Http\Controller\RegisterController;
+use Acme\Infrastructure\Driving\Http\Controller\RoomController;
 use Acme\Infrastructure\Driving\Http\Middleware\RequireAuthentication;
 use Psr\Container\ContainerInterface;
 use Slim\App;
@@ -47,6 +48,14 @@ final class HttpApplication
             $patients->get('/{id}/edit', PatientController::class . ':edit');
             $patients->put('/{id}', PatientController::class . ':update');
             $patients->delete('/{id}', PatientController::class . ':delete');
+        })->add(RequireAuthentication::class);
+
+        $app->group('/rooms', function (RouteCollectorProxyInterface $rooms): void {
+            $rooms->get('', RoomController::class . ':index');
+            $rooms->get('/new', RoomController::class . ':new');
+            $rooms->post('', RoomController::class . ':create');
+            $rooms->post('/{id}/occupants', RoomController::class . ':assign');
+            $rooms->delete('/{id}/occupants/{patientId}', RoomController::class . ':unassign');
         })->add(RequireAuthentication::class);
 
         return $app;

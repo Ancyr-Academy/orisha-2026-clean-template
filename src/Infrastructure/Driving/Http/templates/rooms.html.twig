@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Rooms · Acme{% endblock %}
+
+{% block body %}
+    <div class="page-heading">
+        <h1>Rooms</h1>
+        {% if rooms is not empty %}
+            <a href="/rooms/new" role="button">New room</a>
+        {% endif %}
+    </div>
+
+    {% if error %}
+        <p role="alert">{{ error }}</p>
+    {% endif %}
+
+    {% if rooms is empty %}
+        <article class="empty-state">
+            <p>You have not declared any rooms yet.</p>
+            <a href="/rooms/new" role="button">Declare your first room</a>
+        </article>
+    {% else %}
+        <div class="cards">
+            {% for room in rooms %}
+                <article>
+                    <header>
+                        <strong>Room {{ room.name }}</strong>
+                        <small>{{ room.occupants|length }} / {{ room.capacity }} {{ room.capacity > 1 ? 'beds' : 'bed' }} taken</small>
+                    </header>
+                    <progress value="{{ room.occupants|length }}" max="{{ room.capacity }}"
+                              aria-label="Occupancy of room {{ room.name }}"></progress>
+
+                    {% if room.occupants is empty %}
+                        <p><small>No patient in this room.</small></p>
+                    {% else %}
+                        <ul class="occupants">
+                            {% for occupant in room.occupants %}
+                                <li>
+                                    {{ occupant.fullName }}
+                                    <form method="post" action="/rooms/{{ room.id }}/occupants/{{ occupant.id }}">
+                                        <input type="hidden" name="_METHOD" value="DELETE">
+                                        <button type="submit" class="secondary outline">Remove</button>
+                                    </form>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+
+                    <footer>
+                        {% if room.full %}
+                            <small>This room is full.</small>
+                        {% elseif unassigned_patients is empty %}
+                            <small>None of your patients is waiting for a room.</small>
+                        {% else %}
+                            <form method="post" action="/rooms/{{ room.id }}/occupants">
+                                <fieldset role="group">
+                                    <select name="patient_id" required aria-label="Patient to assign to room {{ room.name }}">
+                                        <option value="" selected disabled>Choose a patient…</option>
+                                        {% for patient in unassigned_patients %}
+                                            <option value="{{ patient.id }}">{{ patient.fullName }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="submit">Assign</button>
+                                </fieldset>
+                            </form>
+                        {% endif %}
+                    </footer>
+                </article>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}

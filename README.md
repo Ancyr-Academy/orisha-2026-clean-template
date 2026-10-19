@@ -1,7 +1,8 @@
 # Acme
 
 A minimal Clean Architecture application in PHP: a Hello World home page, account registration and login, and a small
-patient registry where each account manages its own patients. Everything is persisted in PostgreSQL through Doctrine ORM.
+hospital registry where each account manages its own patients and rooms, assigning patients to rooms within the limit
+of their capacity. Everything is persisted in PostgreSQL through Doctrine ORM.
 
 ## Run
 
@@ -42,14 +43,16 @@ Dependencies point inward: `Infrastructure` → `Application` → `Domain`.
 src/
 ├── Domain/                  Entities, value objects and business rules, no framework code
 │   ├── Account/             Account, Email
-│   └── Patient/             Patient, PersonName, Gender, BirthDate
+│   ├── Patient/             Patient, PersonName, Gender, BirthDate
+│   └── Room/                Room (keeps its occupants and enforces its capacity)
 ├── Application/             Use cases orchestrating the domain
 │   ├── Ports/               Interfaces the use cases need, implemented in Driven (AccountRepository, PatientRepository,
-│   │                        PasswordHasher)
+│   │                        RoomRepository, PasswordHasher)
 │   ├── Bus/                 UseCaseBus, the single entry point to the use cases
 │   ├── Transaction/         TransactionManager port, used by the bus
 │   └── UseCase/             Home, RegisterAccount, Login,
-│                            ListPatients, GetPatient, CreatePatient, UpdatePatient, DeletePatient
+│                            ListPatients, GetPatient, CreatePatient, UpdatePatient, DeletePatient,
+│                            ListRooms, DeclareRoom, AssignPatientToRoom, UnassignPatientFromRoom
 ├── Infrastructure/
 │   ├── Driving/             Adapters calling the application (Slim HTTP controllers, Twig templates, session)
 │   └── Driven/              Adapters called by the application (Doctrine repository + XML mapping, migrations, password hashing)
@@ -67,6 +70,20 @@ Each patient belongs to the account that created it (`Patient::ownerId()`): `Pat
 for a given owner, so a use case can never reach another account's patient, which is reported as not found (404). The
 `/patients` routes require a logged-in account (`RequireAuthentication` middleware), and the HTML forms reach the PUT and
 DELETE routes through a hidden `_METHOD` field (Slim's `MethodOverrideMiddleware`).
+
+### Where do the room rules live?
+
+Like patients, rooms belong to the account that declared them (`Room::ownerId()`), and their names are unique within that
+account. A room's capacity is set when it is declared and never changes. Each rule lives in the layer that can actually
+guarantee it:
+
+| Rule | Enforced by | Why there |
+| --- | --- | --- |
+| A room never holds more patients than its capacity | `Room::assign()` (Domain) | The room is the aggregate that owns its occupants: nothing else can add one, so nothing can bypass the check. |
+| A patient is in at most one room | `AssignPatientToRoomUseCase` (Application) | The rule spans several rooms, so no single `Room` can check it: the use case asks the repository where the patient already is. |
+| An account only places its own patients in its own rooms | The use cases, through `findOneOwnedBy()` on both repositories | Ownership is about who is asking, which the Domain does not know. |
+| Deleting a patient frees their bed | `DeletePatientUseCase` (Application) | Both changes happen in one use case, hence in one transaction. |
+| Two concurrent requests (two tabs, two people sharing an account) cannot both take the last bed | `RoomRepository` (port contract), implemented with `SELECT … FOR UPDATE` in `DoctrineRoomRepository` | Concurrency is a persistence concern: the Domain stays unaware of it, the port states the guarantee and the adapter provides it, relying on the transaction opened by the bus. |
 
 Doctrine is mapped with XML files in `Infrastructure/Driven/Persistence/Doctrine/Mapping`, so the domain entities stay
 free of persistence concerns.

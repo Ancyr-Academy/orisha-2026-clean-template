@@ -20,10 +20,7 @@ abstract class DatabaseTestCase extends TestCase
 
     protected function setUp(): void
     {
-        $this->entityManager = EntityManagerFactory::create(
-            getenv('TEST_DATABASE_URL') ?: 'postgresql://acme:acme@127.0.0.1:5433/acme_test?serverVersion=18&charset=utf8',
-            devMode: true,
-        );
+        $this->entityManager = self::createEntityManager();
 
         try {
             $schemaTool = new SchemaTool($this->entityManager);
@@ -33,5 +30,16 @@ abstract class DatabaseTestCase extends TestCase
         } catch (ConnectionException $exception) {
             self::markTestSkipped('Test database is not reachable: ' . $exception->getMessage());
         }
+    }
+
+    /**
+     * Each entity manager opens its own connection, e.g. to act as a concurrent request.
+     */
+    protected static function createEntityManager(): EntityManagerInterface
+    {
+        return EntityManagerFactory::create(
+            getenv('TEST_DATABASE_URL') ?: 'postgresql://acme:acme@127.0.0.1:5433/acme_test?serverVersion=18&charset=utf8',
+            devMode: true,
+        );
     }
 }

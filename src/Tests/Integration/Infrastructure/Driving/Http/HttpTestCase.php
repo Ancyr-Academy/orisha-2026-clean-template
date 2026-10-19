@@ -6,12 +6,14 @@ namespace Acme\Tests\Integration\Infrastructure\Driving\Http;
 
 use Acme\Application\Ports\AccountRepository;
 use Acme\Application\Ports\PatientRepository;
+use Acme\Application\Ports\RoomRepository;
 use Acme\Application\Transaction\TransactionManager;
 use Acme\Infrastructure\Driving\Http\HttpApplication;
 use Acme\Infrastructure\Driving\Http\Session\Session;
 use Acme\Tests\Integration\Double\ArraySession;
 use Acme\Tests\Unit\Double\InMemoryAccountRepository;
 use Acme\Tests\Unit\Double\InMemoryPatientRepository;
+use Acme\Tests\Unit\Double\InMemoryRoomRepository;
 use Acme\Tests\Unit\Double\SpyTransactionManager;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
@@ -22,6 +24,7 @@ abstract class HttpTestCase extends TestCase
 {
     protected InMemoryAccountRepository $accounts;
     protected InMemoryPatientRepository $patients;
+    protected InMemoryRoomRepository $rooms;
     protected ArraySession $session;
     protected SpyTransactionManager $transactions;
     private App $app;
@@ -30,6 +33,7 @@ abstract class HttpTestCase extends TestCase
     {
         $this->accounts = new InMemoryAccountRepository();
         $this->patients = new InMemoryPatientRepository();
+        $this->rooms = new InMemoryRoomRepository();
         $this->session = new ArraySession();
         $this->transactions = new SpyTransactionManager();
 
@@ -37,6 +41,7 @@ abstract class HttpTestCase extends TestCase
             'app.log_errors' => false, // 404/405 responses are expected here: keep the test output clean
             AccountRepository::class => $this->accounts,
             PatientRepository::class => $this->patients,
+            RoomRepository::class => $this->rooms,
             Session::class => $this->session,
             TransactionManager::class => $this->transactions,
         ]);

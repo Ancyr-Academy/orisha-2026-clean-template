@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New room · Acme{% endblock %}
+
+{% block body %}
+    <article class="narrow">
+        <header>
+            <h1>New room</h1>
+        </header>
+
+        {% if error %}
+            <p role="alert">{{ error }}</p>
+        {% endif %}
+
+        <form method="post" action="/rooms">
+            <label>
+                Name
+                <input type="text" name="name" value="{{ name }}" required maxlength="{{ maximum_name_length }}"
+                       autocomplete="off" placeholder="101">
+            </label>
+            <label>
+                Capacity
+                <input type="number" name="capacity" value="{{ capacity }}" required min="1" step="1"
+                       aria-describedby="capacity-helper">
+                <small id="capacity-helper">Number of beds. It cannot be changed once the room is declared.</small>
+            </label>
+            <div class="form-actions">
+                <a href="/rooms" role="button" class="secondary outline">Cancel</a>
+                <button type="submit">Declare room</button>
+            </div>
+        </form>
+    </article>
+{% endblock %}
