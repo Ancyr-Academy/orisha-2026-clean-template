@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Acme\Domain\Account;
+namespace Acme\Application\Ports;
 
+use Acme\Domain\Account\Account;
+use Acme\Domain\Account\Email;
 use Acme\Domain\Account\Exception\EmailAlreadyInUse;
 
 interface AccountRepository

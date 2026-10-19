@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Patients · Acme{% endblock %}
+
+{% block body %}
+    <div class="page-heading">
+        <h1>Patients</h1>
+        {% if patients is not empty %}
+            <a href="/patients/new" role="button">New patient</a>
+        {% endif %}
+    </div>
+
+    {% if patients is empty %}
+        <article class="empty-state">
+            <p>You have not added any patients yet.</p>
+            <a href="/patients/new" role="button">Add your first patient</a>
+        </article>
+    {% else %}
+        <div class="overflow-auto">
+            <table class="striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Gender</th>
+                        <th scope="col">Birth date</th>
+                        <th scope="col">Age</th>
+                        <th scope="col"><span class="visually-hidden">Actions</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for patient in patients %}
+                        <tr>
+                            <th scope="row">{{ patient.lastName }}, {{ patient.firstName }}</th>
+                            <td>{{ patient.gender|capitalize }}</td>
+                            <td><time datetime="{{ patient.birthDate }}">{{ patient.birthDate|date('j M Y') }}</time></td>
+                            <td>{{ patient.age }}</td>
+                            <td>
+                                <div class="row-actions">
+                                    <a href="/patients/{{ patient.id }}/edit">Edit</a>
+                                    <form method="post" action="/patients/{{ patient.id }}"
+                                          data-confirm="Delete {{ patient.firstName }} {{ patient.lastName }}? This cannot be undone.">
+                                        <input type="hidden" name="_METHOD" value="DELETE">
+                                        <button type="submit" class="secondary outline">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+{% endblock %}

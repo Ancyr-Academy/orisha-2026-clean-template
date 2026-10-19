@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Acme\Infrastructure\Driven\Security;
 
-use Acme\Domain\Account\PasswordHasher;
+use Acme\Application\Ports\PasswordHasher;
 
 final readonly class NativePasswordHasher implements PasswordHasher
 {

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Acme\Application\UseCase\RegisterAccount;
 
+use Acme\Application\Ports\AccountRepository;
+use Acme\Application\Ports\PasswordHasher;
 use Acme\Domain\Account\Account;
-use Acme\Domain\Account\AccountRepository;
 use Acme\Domain\Account\Email;
 use Acme\Domain\Account\Exception\EmailAlreadyInUse;
 use Acme\Domain\Account\Exception\InvalidEmail;
-use Acme\Domain\Account\PasswordHasher;
 use DateTimeImmutable;
 
 final readonly class RegisterAccountUseCase

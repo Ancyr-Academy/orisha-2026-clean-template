@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Acme\Tests\Unit\Double;
 
+use Acme\Application\Ports\AccountRepository;
 use Acme\Domain\Account\Account;
-use Acme\Domain\Account\AccountRepository;
 use Acme\Domain\Account\Email;
 use Acme\Domain\Account\Exception\EmailAlreadyInUse;
 use Symfony\Component\Uid\Uuid;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Acme\Domain\Account;
+namespace Acme\Application\Ports;
 
 interface PasswordHasher
 {

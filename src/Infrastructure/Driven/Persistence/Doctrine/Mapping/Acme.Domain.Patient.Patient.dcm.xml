@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                                      https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+    <entity name="Acme\Domain\Patient\Patient" table="patients">
+        <indexes>
+            <index name="idx_patients_owner_name" columns="owner_id,last_name,first_name"/>
+        </indexes>
+
+        <id name="id" type="guid"/>
+        <field name="ownerId" column="owner_id" type="guid"/>
+        <embedded name="name" class="Acme\Domain\Patient\PersonName" use-column-prefix="false"/>
+        <field name="gender" type="string" length="16" enum-type="Acme\Domain\Patient\Gender"/>
+        <embedded name="birthDate" class="Acme\Domain\Patient\BirthDate" use-column-prefix="false"/>
+    </entity>
+</doctrine-mapping>

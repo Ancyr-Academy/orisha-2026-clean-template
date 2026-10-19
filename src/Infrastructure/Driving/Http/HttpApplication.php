@@ -7,10 +7,14 @@ namespace Acme\Infrastructure\Driving\Http;
 use Acme\Infrastructure\Driving\Http\Controller\HomeController;
 use Acme\Infrastructure\Driving\Http\Controller\LoginController;
 use Acme\Infrastructure\Driving\Http\Controller\LogoutController;
+use Acme\Infrastructure\Driving\Http\Controller\PatientController;
 use Acme\Infrastructure\Driving\Http\Controller\RegisterController;
+use Acme\Infrastructure\Driving\Http\Middleware\RequireAuthentication;
 use Psr\Container\ContainerInterface;
 use Slim\App;
 use Slim\Factory\AppFactory;
+use Slim\Interfaces\RouteCollectorProxyInterface;
+use Slim\Middleware\MethodOverrideMiddleware;
 
 final class HttpApplication
 {
@@ -22,6 +26,8 @@ final class HttpApplication
 
         $app->addBodyParsingMiddleware();
         $app->addRoutingMiddleware();
+        // HTML forms only send GET and POST: a hidden "_METHOD" field lets them reach PUT and DELETE routes
+        $app->add(new MethodOverrideMiddleware());
         $logErrors = (bool) $container->get('app.log_errors');
         $app->addErrorMiddleware((bool) $container->get('app.debug'), $logErrors, $logErrors)
             ->getDefaultErrorHandler()
@@ -33,6 +39,15 @@ final class HttpApplication
         $app->get('/login', LoginController::class . ':show');
         $app->post('/login', LoginController::class . ':submit');
         $app->post('/logout', LogoutController::class);
+
+        $app->group('/patients', function (RouteCollectorProxyInterface $patients): void {
+            $patients->get('', PatientController::class . ':index');
+            $patients->get('/new', PatientController::class . ':new');
+            $patients->post('', PatientController::class . ':create');
+            $patients->get('/{id}/edit', PatientController::class . ':edit');
+            $patients->put('/{id}', PatientController::class . ':update');
+            $patients->delete('/{id}', PatientController::class . ':delete');
+        })->add(RequireAuthentication::class);
 
         return $app;
     }

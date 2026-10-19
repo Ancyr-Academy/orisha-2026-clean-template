@@ -5,16 +5,28 @@ declare(strict_types=1);
 use Acme\Application\Bus\DirectUseCaseBus;
 use Acme\Application\Bus\TransactionalUseCaseBus;
 use Acme\Application\Bus\UseCaseBus;
+use Acme\Application\Ports\AccountRepository;
+use Acme\Application\Ports\PasswordHasher;
+use Acme\Application\Ports\PatientRepository;
 use Acme\Application\Transaction\TransactionManager;
+use Acme\Application\UseCase\CreatePatient\CreatePatientCommand;
+use Acme\Application\UseCase\CreatePatient\CreatePatientUseCase;
+use Acme\Application\UseCase\DeletePatient\DeletePatientCommand;
+use Acme\Application\UseCase\DeletePatient\DeletePatientUseCase;
+use Acme\Application\UseCase\GetPatient\GetPatientQuery;
+use Acme\Application\UseCase\GetPatient\GetPatientUseCase;
 use Acme\Application\UseCase\Home\HomeQuery;
 use Acme\Application\UseCase\Home\HomeUseCase;
+use Acme\Application\UseCase\ListPatients\ListPatientsQuery;
+use Acme\Application\UseCase\ListPatients\ListPatientsUseCase;
 use Acme\Application\UseCase\Login\LoginCommand;
 use Acme\Application\UseCase\Login\LoginUseCase;
 use Acme\Application\UseCase\RegisterAccount\RegisterAccountCommand;
 use Acme\Application\UseCase\RegisterAccount\RegisterAccountUseCase;
-use Acme\Domain\Account\AccountRepository;
-use Acme\Domain\Account\PasswordHasher;
+use Acme\Application\UseCase\UpdatePatient\UpdatePatientCommand;
+use Acme\Application\UseCase\UpdatePatient\UpdatePatientUseCase;
 use Acme\Infrastructure\Driven\Persistence\Doctrine\DoctrineAccountRepository;
+use Acme\Infrastructure\Driven\Persistence\Doctrine\DoctrinePatientRepository;
 use Acme\Infrastructure\Driven\Persistence\Doctrine\DoctrineTransactionManager;
 use Acme\Infrastructure\Driven\Persistence\Doctrine\EntityManagerFactory;
 use Acme\Infrastructure\Driven\Security\NativePasswordHasher;
@@ -27,6 +39,8 @@ use Doctrine\Migrations\Configuration\Migration\ConfigurationArray;
 use Doctrine\Migrations\DependencyFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
+use Slim\Psr7\Factory\ResponseFactory;
 use Slim\Views\Twig;
 
 use function DI\autowire;
@@ -51,6 +65,11 @@ return static function (array $overrides = []): ContainerInterface {
                 HomeQuery::class => static fn (): HomeUseCase => $c->get(HomeUseCase::class),
                 RegisterAccountCommand::class => static fn (): RegisterAccountUseCase => $c->get(RegisterAccountUseCase::class),
                 LoginCommand::class => static fn (): LoginUseCase => $c->get(LoginUseCase::class),
+                ListPatientsQuery::class => static fn (): ListPatientsUseCase => $c->get(ListPatientsUseCase::class),
+                GetPatientQuery::class => static fn (): GetPatientUseCase => $c->get(GetPatientUseCase::class),
+                CreatePatientCommand::class => static fn (): CreatePatientUseCase => $c->get(CreatePatientUseCase::class),
+                UpdatePatientCommand::class => static fn (): UpdatePatientUseCase => $c->get(UpdatePatientUseCase::class),
+                DeletePatientCommand::class => static fn (): DeletePatientUseCase => $c->get(DeletePatientUseCase::class),
             ]),
             $c->get(TransactionManager::class),
         ),
@@ -62,6 +81,7 @@ return static function (array $overrides = []): ContainerInterface {
             $c->get('app.debug'),
         ),
         AccountRepository::class => autowire(DoctrineAccountRepository::class),
+        PatientRepository::class => autowire(DoctrinePatientRepository::class),
         PasswordHasher::class => autowire(NativePasswordHasher::class),
         DependencyFactory::class => static fn (ContainerInterface $c): DependencyFactory => DependencyFactory::fromEntityManager(
             new ConfigurationArray([
@@ -75,6 +95,7 @@ return static function (array $overrides = []): ContainerInterface {
         ),
 
         // Driving
+        ResponseFactoryInterface::class => autowire(ResponseFactory::class),
         Session::class => autowire(PhpSession::class),
         Twig::class => static function (ContainerInterface $c): Twig {
             $twig = Twig::create(HttpApplication::TEMPLATES_DIR, [

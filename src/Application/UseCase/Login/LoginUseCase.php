@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Acme\Application\UseCase\Login;
 
-use Acme\Domain\Account\AccountRepository;
+use Acme\Application\Ports\AccountRepository;
+use Acme\Application\Ports\PasswordHasher;
 use Acme\Domain\Account\Email;
 use Acme\Domain\Account\Exception\InvalidEmail;
-use Acme\Domain\Account\PasswordHasher;
 
 final readonly class LoginUseCase
 {

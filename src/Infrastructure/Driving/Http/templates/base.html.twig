@@ -12,6 +12,7 @@
           crossorigin="anonymous">
     <style>
         .narrow { max-width: 28rem; margin-inline: auto; }
+        nav { gap: var(--pico-nav-element-spacing-horizontal); }
         nav ul, nav .account { min-width: 0; }
         nav .account small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         nav form { margin: 0; }
@@ -22,7 +23,28 @@
             padding: calc(var(--pico-nav-link-spacing-vertical) - var(--pico-border-width) * 2) var(--pico-nav-link-spacing-horizontal);
         }
         [role="alert"] { color: var(--pico-del-color); }
+        .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+        .page-heading { display: flex; flex-wrap: wrap; gap: var(--pico-spacing); align-items: center; justify-content: space-between; margin-bottom: var(--pico-spacing); }
+        .page-heading h1 { margin: 0; }
+        .empty-state { text-align: center; }
+        .form-actions { display: flex; gap: var(--pico-spacing); justify-content: flex-end; }
+        .form-actions > * { margin: 0; width: auto; }
+        /* Keep table rows on one line: narrow screens scroll the table horizontally instead */
+        .overflow-auto { position: relative; }
+        .overflow-auto th, .overflow-auto td { white-space: nowrap; }
+        .row-actions { display: flex; gap: var(--pico-spacing); align-items: center; justify-content: flex-end; }
+        .row-actions form { margin: 0; }
+        .row-actions [type="submit"] { margin: 0; width: auto; padding: 0.25rem 0.75rem; }
     </style>
+    <script>
+        // Asks for confirmation before submitting a form flagged with data-confirm (e.g. a deletion)
+        document.addEventListener('submit', (event) => {
+            const message = event.target.dataset.confirm;
+            if (message && !confirm(message)) {
+                event.preventDefault();
+            }
+        });
+    </script>
 </head>
 <body>
     {% set account = session.get('account') %}
@@ -33,6 +55,7 @@
             </ul>
             <ul>
                 {% if account %}
+                    <li><a href="/patients">Patients</a></li>
                     <li class="account"><small title="{{ account.email }}">Logged in as {{ account.email }}</small></li>
                     <li>
                         <form method="post" action="/logout">
